@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>pong</title>
+<style>
+    body {
+        margin: 0;
+        background: #111;
+        overflow: hidden;
+    }
+    canvas {
+        display: block;
+        margin: auto;
+        background: black;
+        touch-action: none;
+        width: 100vw;
+        height: 100vh;
+    }
+</style>
+</head>
+<body>
+
+<canvas id="game"></canvas>
+
+<script>
+/* ============================================================
+   CONFIG
+   ============================================================ */
+const WINDOW_WIDTH = 400;
+const WINDOW_HEIGHT = 400;
+const w = 20;
+const h = 20;
+
+/* ============================================================
+   GLOBALS
+   ============================================================ */
+const canvas = document.getElementById("game");
+canvas.width = WINDOW_WIDTH;
+canvas.height = WINDOW_HEIGHT;
+
+const ctx = canvas.getContext("2d");
+
+let running = true;
+let dir = "right";  // FIXED: declared dir variable
+
+/* ============================================================
+   INPUT
+   ============================================================ */
+const keys = {};
+
+window.addEventListener("keydown", (e) => {
+    keys[e.key] = true;
+});
+
+window.addEventListener("keyup", (e) => {
+    keys[e.key] = false;
+});
+
+/* ============================================================
+   UNIVERSAL INPUT (Single handler for Mouse + Touch)
+   ============================================================ */
+function handleInput(e) {
+    e.preventDefault();
+    
+    let clientX, clientY;
+    if (e.touches) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;  // Get Y from touch
+    } else {
+        clientX = e.clientX;
+        clientY = e.clientY;  // ✅ Get Y from mouse
+    }
+    
+    const rect = canvas.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;  // ✅ Calculate actual Y position
+    
+    // Scale coordinates to match canvas size
+    const scaleX = WINDOW_WIDTH / rect.width;
+    const scaleY = WINDOW_HEIGHT / rect.height;
+    const canvasX = x * scaleX;
+    const canvasY = y * scaleY;
+    
+    // Left half - controls Player 1
+    if (canvasX < WINDOW_WIDTH / 2) {
+        if (canvasY > WINDOW_HEIGHT / 2) {
+            p1y += ph;  // Move down
+        } else {
+            p1y -= ph;  // Move up
+        }
+    }
+    // Right half - controls Player 2
+    else {
+        if (canvasY > WINDOW_HEIGHT / 2) {
+            p2y += ph;  // Move down
+        } else {
+            p2y -= ph;  // Move up
+        }
+    }
+}
+
+canvas.addEventListener("touchstart", handleInput);
+canvas.addEventListener("mousedown", handleInput);
+
+/* ============================================================
+   GAME STATE
+   ============================================================ */
+let bx = 200
+let by = 200
+let vx = 10
+let vy = 10
+
+let pw=w/2
+let ph=w*4
+
+let p1x=40
+let p1y=0
+
+let p2x=360
+let p2y=0
+/* ============================================================
+   MAIN LOOP
+   ============================================================ */
+function game_loop() {
+    if (!running) return;
+
+    /* ===== UPDATE ===== */
+    if (keys["w"]){p1y=p1y-h}
+    if (keys["s"]){p1y=p1y+h}
+    if (keys["ArrowUp"]){p2y=p2y-h}
+    if (keys["ArrowDown"]){p2y=p2y+h}
+
+    /* ===== RENDER ===== */
+    //clear screen
+    ctx.fillStyle="#202020"
+    ctx.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
+
+    ctx.fillStyle="#ffffff"
+    ctx.fillRect(bx, by, w, h)
+
+    ctx.fillStyle="#FF0000"
+    ctx.fillRect(p1x, p1y, pw, ph)
+
+    ctx.fillStyle="#0000FF"
+    ctx.fillRect(p2x, p2y, pw, ph)
+    
+    // Your original bouncing logic
+    bx=bx+vx
+    by=by+vy
+    if((bx >= 400) || (bx <= 0)){
+        by=200;bx=200;vx=10;vy=10
+    }
+
+    if((by+20 >= 400) || (by <= 0)){
+        vy=vy*(-1)
+        by=by+vy
+    }
+
+    if((p1x+pw === bx)&&(p1y <= by)&&(by <= p1y+ph)){
+        vx=vx*(-1)
+        bx=bx+vx
+    }
+    if((p2x+pw === bx+20)&&(p2y <= by)&&(by <= p2y+ph)){
+        vx=vx*(-1)
+        bx=bx+vx
+    }
+    setTimeout(() => {
+        requestAnimationFrame(game_loop);
+    }, 50);
+}
+
+game_loop();
+</script>
+</body>
+</html>
