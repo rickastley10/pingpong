@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>pingpong</title>
+<title>pong</title>
 <style>
     body {
         margin: 0;
@@ -138,6 +138,8 @@ let p2x=360
 let p2y=0
 
 let ai=0
+
+let x=0 // temporary buffer 
 /* ============================================================
    MAIN LOOP
    ============================================================ */
@@ -180,6 +182,12 @@ function game_loop() {
     ctx.fillStyle="#0000FF"
     ctx.fillRect(p2x, p2y, pw, ph)
     
+    while(x<10){
+        ctx.fillStyle="#ffffff"
+        ctx.fillRect(200-2, x*40, 4, 30)
+        x=x+1
+    }
+    x=0
     // Your original bouncing logic
     bx=bx+vx
     by=by+vy
