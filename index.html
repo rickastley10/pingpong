@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>pong</title>
+<title>pingpong</title>
 <style>
     body {
         margin: 0;
@@ -43,7 +43,7 @@ canvas.height = WINDOW_HEIGHT;
 const ctx = canvas.getContext("2d");
 
 let running = true;
-let dir = "right";  // FIXED: declared dir variable
+let dir = "right";
 
 /* ============================================================
    INPUT
@@ -67,15 +67,15 @@ function handleInput(e) {
     let clientX, clientY;
     if (e.touches) {
         clientX = e.touches[0].clientX;
-        clientY = e.touches[0].clientY;  // Get Y from touch
+        clientY = e.touches[0].clientY; 
     } else {
         clientX = e.clientX;
-        clientY = e.clientY;  // ✅ Get Y from mouse
+        clientY = e.clientY;  
     }
     
     const rect = canvas.getBoundingClientRect();
     const x = clientX - rect.left;
-    const y = clientY - rect.top;  // ✅ Calculate actual Y position
+    const y = clientY - rect.top;  
     
     // Scale coordinates to match canvas size
     const scaleX = WINDOW_WIDTH / rect.width;
@@ -83,20 +83,33 @@ function handleInput(e) {
     const canvasX = x * scaleX;
     const canvasY = y * scaleY;
     
+    if(canvasX > 150&& canvasX < 250 && canvasY < 100){
+        if(ai===0){ai=1}
+        else{ai=0}
+    }
+
     // Left half - controls Player 1
     if (canvasX < WINDOW_WIDTH / 2) {
         if (canvasY > WINDOW_HEIGHT / 2) {
-            p1y += ph;  // Move down
+            if(p1y <=400-ph*2){
+                p1y=p1y+ph
+            }
         } else {
-            p1y -= ph;  // Move up
+            if(p1y >= 0+ph){
+                p1y=p1y-ph
+            }
         }
     }
     // Right half - controls Player 2
     else {
         if (canvasY > WINDOW_HEIGHT / 2) {
-            p2y += ph;  // Move down
+            if(p2y <=400-ph*2){
+                p2y=p2y+ph
+            }
         } else {
-            p2y -= ph;  // Move up
+            if(p2y >= 0+ph){
+                p2y=p2y-ph
+            }
         }
     }
 }
@@ -109,8 +122,11 @@ canvas.addEventListener("mousedown", handleInput);
    ============================================================ */
 let bx = 200
 let by = 200
-let vx = 10
-let vy = 10
+let vx = 5
+let vy = 5
+
+let score1=0
+let score2=0
 
 let pw=w/2
 let ph=w*4
@@ -120,6 +136,8 @@ let p1y=0
 
 let p2x=360
 let p2y=0
+
+let ai=0
 /* ============================================================
    MAIN LOOP
    ============================================================ */
@@ -127,14 +145,30 @@ function game_loop() {
     if (!running) return;
 
     /* ===== UPDATE ===== */
-    if (keys["w"]){p1y=p1y-h}
-    if (keys["s"]){p1y=p1y+h}
-    if (keys["ArrowUp"]){p2y=p2y-h}
-    if (keys["ArrowDown"]){p2y=p2y+h}
+    if (keys["w"]){
+        if(p1y >=0){
+            p1y=p1y-h
+        }
+    }
+    if (keys["s"]){
+        if(p1y <=400-ph){
+            p1y=p1y+h
+        }
+    }
+    if (keys["ArrowUp"]){
+        if(p2y >=0){
+            p2y=p2y-h
+        }
+    }
+    if (keys["ArrowDown"]){
+        if(p2y <=400-ph){
+            p2y=p2y+h
+        }
+    }
 
     /* ===== RENDER ===== */
     //clear screen
-    ctx.fillStyle="#202020"
+    ctx.fillStyle="#000000"
     ctx.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
 
     ctx.fillStyle="#ffffff"
@@ -149,23 +183,57 @@ function game_loop() {
     // Your original bouncing logic
     bx=bx+vx
     by=by+vy
-    if((bx >= 400) || (bx <= 0)){
-        by=200;bx=200;vx=10;vy=10
+
+    if (ai===1){
+        if(by>p2y){p2y=p2y+ph}
+        if(by<p2y){p2y=p2y-ph}
+
+        if(1===2){
+            if(by>p1y){p1y=p1y+ph}
+            if(by<p1y){p1y=p1y-ph}
+        }
     }
 
+
+    if((bx >= 400)){
+        by=200;bx=200;vx=5;vy=5; score1=score1+1;
+    }
+    if((bx <= 0)){
+        by=200;bx=200;vx=5;vy=5; score2=score2+1;
+    }
     if((by+20 >= 400) || (by <= 0)){
         vy=vy*(-1)
         by=by+vy
     }
 
-    if((p1x+pw === bx)&&(p1y <= by)&&(by <= p1y+ph)){
+    if((bx <= p1x + pw) && (bx + w >= p1x) && (by <= p1y + ph) && (by + h >= p1y) && vx < 0){
         vx=vx*(-1)
-        bx=bx+vx
+        bx = p1x + pw;
+
+        if(vx<=0){
+            vx=vx-1
+        }
+        else{
+            vx=vx+1
+        }
     }
-    if((p2x+pw === bx+20)&&(p2y <= by)&&(by <= p2y+ph)){
+    if((bx + w >= p2x) && (bx <= p2x + pw) && (by <= p2y + ph) && (by + h >= p2y) && vx > 0){
         vx=vx*(-1)
-        bx=bx+vx
+        bx = p2x - w;
+        
+
+        if(vx<=0){
+            vx=vx-1
+        }
+        else{
+            vx=vx+1
+        }
     }
+
+    ctx.fillStyle="#FF0000"
+    ctx.fillText(score1, 150, 100)
+    ctx.fillStyle="#0000FF"
+    ctx.fillText(score2, 250, 100)
     setTimeout(() => {
         requestAnimationFrame(game_loop);
     }, 50);
