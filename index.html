@@ -84,15 +84,21 @@ function handleInput(e) {
     const canvasY = y * scaleY;
     
     if(canvasX > 150&& canvasX < 250 && canvasY < 100){
-        if(ai===0){ai=1}
-        else{ai=0}
+        if(menu===0){menu=1}
+        else{menu=0}
     }
 
     // Left half - controls Player 1
     if (canvasX < WINDOW_WIDTH / 2) {
         if (canvasY > WINDOW_HEIGHT / 2) {
-            if(p1y <=400-ph*2){
-                p1y=p1y+ph
+           if(menu===1){
+                if(ai1===1){ai1=0}
+                else{ai1=1}
+            }
+            else{
+                if(p1y <=400-ph*2){
+                    p1y=p1y+ph
+                }
             }
         } else {
             if(p1y >= 0+ph){
@@ -103,8 +109,14 @@ function handleInput(e) {
     // Right half - controls Player 2
     else {
         if (canvasY > WINDOW_HEIGHT / 2) {
-            if(p2y <=400-ph*2){
-                p2y=p2y+ph
+            if(menu===1){
+                if(ai2===1){ai2=0}
+                else{ai2=1}
+            }
+            else{
+                if(p2y <=400-ph*2){
+                    p2y=p2y+ph
+                }
             }
         } else {
             if(p2y >= 0+ph){
@@ -137,111 +149,174 @@ let p1y=0
 let p2x=360
 let p2y=0
 
-let ai=0
+let ai2=0
+let ai1=0
 
 let x=0 // temporary buffer 
+
+let menu=1
+let clr=1
 /* ============================================================
    MAIN LOOP
    ============================================================ */
 function game_loop() {
     if (!running) return;
-
-    /* ===== UPDATE ===== */
-    if (keys["w"]){
-        if(p1y >=0){
-            p1y=p1y-h
-        }
-    }
-    if (keys["s"]){
-        if(p1y <=400-ph){
-            p1y=p1y+h
-        }
-    }
-    if (keys["ArrowUp"]){
-        if(p2y >=0){
-            p2y=p2y-h
-        }
-    }
-    if (keys["ArrowDown"]){
-        if(p2y <=400-ph){
-            p2y=p2y+h
-        }
-    }
-
-    /* ===== RENDER ===== */
-    //clear screen
-    ctx.fillStyle="#000000"
-    ctx.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
-
-    ctx.fillStyle="#ffffff"
-    ctx.fillRect(bx, by, w, h)
-
-    ctx.fillStyle="#FF0000"
-    ctx.fillRect(p1x, p1y, pw, ph)
-
-    ctx.fillStyle="#0000FF"
-    ctx.fillRect(p2x, p2y, pw, ph)
-    
-    while(x<10){
-        ctx.fillStyle="#ffffff"
-        ctx.fillRect(200-2, x*40, 4, 30)
-        x=x+1
-    }
-    x=0
-    // Your original bouncing logic
-    bx=bx+vx
-    by=by+vy
-
-    if (ai===1){
-        if(by>p2y){p2y=p2y+ph}
-        if(by<p2y){p2y=p2y-ph}
-
-        if(1===2){
-            if(by>p1y){p1y=p1y+ph}
-            if(by<p1y){p1y=p1y-ph}
-        }
-    }
-
-
-    if((bx >= 400)){
-        by=200;bx=200;vx=5;vy=5; score1=score1+1;
-    }
-    if((bx <= 0)){
-        by=200;bx=200;vx=5;vy=5; score2=score2+1;
-    }
-    if((by+20 >= 400) || (by <= 0)){
-        vy=vy*(-1)
-        by=by+vy
-    }
-
-    if((bx <= p1x + pw) && (bx + w >= p1x) && (by <= p1y + ph) && (by + h >= p1y) && vx < 0){
-        vx=vx*(-1)
-        bx = p1x + pw;
-
-        if(vx<=0){
-            vx=vx-1
-        }
-        else{
-            vx=vx+1
-        }
-    }
-    if((bx + w >= p2x) && (bx <= p2x + pw) && (by <= p2y + ph) && (by + h >= p2y) && vx > 0){
-        vx=vx*(-1)
-        bx = p2x - w;
+        
         
 
-        if(vx<=0){
-            vx=vx-1
+    if (menu===1){
+        //clear screen
+        ctx.fillStyle="#000000"
+        ctx.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
+        if(menu===1){
+            ctx.fillStyle="#aa0000"
+            ctx.fillText("||", 200, 50)
         }
-        else{
-            vx=vx+1
+        if (keys["w"]){
+            menu=0
         }
-    }
+        if (keys["s"]){
+            menu=0
+        }
+        if (keys["ArrowUp"]){
+            menu=0
+        }
+        if (keys["ArrowDown"]){
+            menu=0
+        }
 
-    ctx.fillStyle="#FF0000"
-    ctx.fillText(score1, 150, 100)
-    ctx.fillStyle="#0000FF"
-    ctx.fillText(score2, 250, 100)
+        clr=clr+1
+        if(clr> 0&& clr < 10){ctx.fillStyle="#aa0000"}
+        if(clr> 10&& clr < 20){ctx.fillStyle="#aaaa00"}
+        if(clr> 20&& clr < 30){ctx.fillStyle="#00aa00"}
+        if(clr> 30&& clr < 40){ctx.fillStyle="#00aaaa"}
+        if(clr> 50&& clr < 60){ctx.fillStyle="#0000aa"}
+        if(clr > 60){clr=0}
+        ctx.fillText("PONG!", 200, 200)
+
+
+
+        // ai1
+        ctx.fillStyle="#aaaaaa"
+        ctx.fillText("ai 1: ", 50, 300)
+        if(ai1===1){ctx.fillStyle="#00FF00"
+        ctx.fillText("on", 50, 310)}
+        else{ctx.fillStyle="#FF0000"
+        ctx.fillText("off", 50, 310)}
+
+
+        // ai2
+        ctx.fillStyle="#aaaaaa"
+        ctx.fillText("ai 2: ", 350, 300)
+        if(ai2===1){ctx.fillStyle="#00FF00"
+        ctx.fillText("on", 350, 310)}
+        else{ctx.fillStyle="#FF0000"
+        ctx.fillText("off", 350, 310)}
+
+    }
+    if(menu===0){
+        
+        /* ===== UPDATE ===== */
+        if (keys["w"]){
+            if(p1y >=0){
+                p1y=p1y-h
+            }
+        }
+        if (keys["s"]){
+            if(p1y <=400-ph){
+                p1y=p1y+h
+            }
+        }
+        if (keys["ArrowUp"]){
+            if(p2y >=0){
+                p2y=p2y-h
+            }
+        }
+        if (keys["ArrowDown"]){
+            if(p2y <=400-ph){
+                p2y=p2y+h
+            }
+        }
+
+        /* ===== RENDER ===== */
+        //clear screen
+        ctx.fillStyle="#000000"
+        ctx.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
+
+        ctx.fillStyle="#ffffff"
+        ctx.fillRect(bx, by, w, h)
+
+        ctx.fillStyle="#FF0000"
+        ctx.fillRect(p1x, p1y, pw, ph)
+
+        ctx.fillStyle="#0000FF"
+        ctx.fillRect(p2x, p2y, pw, ph)
+        
+        while(x<10){
+            ctx.fillStyle="#FFFFFF"
+            ctx.fillRect(200-2, x*40, 4, 30)
+            x=x+1
+        }
+        x=0
+        // Your original bouncing logic
+        bx=bx+vx
+        by=by+vy
+
+        if (ai2===1){
+            if(by>p2y){p2y=p2y+ph}
+            if(by<p2y){p2y=p2y-ph}
+        }
+        if(ai1===1){
+                if(by>p1y){p1y=p1y+ph}
+                if(by<p1y){p1y=p1y-ph}
+            }
+        
+
+
+        if((bx >= 400)){
+            by=200;bx=200;vx=5;vy=5; score1=score1+1;
+        }
+        if((bx <= 0)){
+            by=200;bx=200;vx=5;vy=5; score2=score2+1;
+        }
+        if((by+20 >= 400) || (by <= 0)){
+            vy=vy*(-1)
+            by=by+vy
+        }
+
+        if((bx <= p1x + pw)&& (by <= p1y + ph) && (by + h >= p1y)){
+            vx=vx*(-1)
+            bx = p1x + pw;
+
+            if(vx<=0){
+                vx=vx-1
+            }
+            else{
+                vx=vx+1
+            }
+        }
+
+
+        if((bx+w >= p2x) &&(by <= p2y + ph) && (by + h >= p2y)){
+            vx=vx*(-1)
+            bx = p2x - w;
+            
+
+            if(vx<=0){
+                vx=vx-1
+            }
+            else{
+                vx=vx+1
+            }
+        }
+
+        ctx.fillStyle="#FF0000"
+        ctx.fillText(score1, 150, 100)
+        ctx.fillStyle="#0000FF"
+        ctx.fillText(score2, 250, 100)
+
+        
+    }
     setTimeout(() => {
         requestAnimationFrame(game_loop);
     }, 50);
