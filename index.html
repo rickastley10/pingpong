@@ -92,7 +92,9 @@ function handleInput(e) {
     if (canvasX < WINDOW_WIDTH / 2) {
         if (canvasY > WINDOW_HEIGHT / 2) {
            if(menu===1){
-                if(ai1===1){ai1=0}
+                if(ai1===1){ai1=2}
+                else if(ai1===2){ai1=3}
+                else if(ai1===3){ai1=0}
                 else{ai1=1}
             }
             else{
@@ -110,7 +112,9 @@ function handleInput(e) {
     else {
         if (canvasY > WINDOW_HEIGHT / 2) {
             if(menu===1){
-                if(ai2===1){ai2=0}
+                if(ai2===1){ai2=2}
+                else if(ai2===2){ai2=3}
+                else if(ai2===3){ai2=0}
                 else{ai2=1}
             }
             else{
@@ -200,7 +204,11 @@ function game_loop() {
         ctx.fillStyle="#aaaaaa"
         ctx.fillText("ai 1: ", 50, 300)
         if(ai1===1){ctx.fillStyle="#00FF00"
-        ctx.fillText("on", 50, 310)}
+        ctx.fillText("on, lvl 3", 50, 310)}
+        else if(ai1===2){ctx.fillStyle="#00FF00"
+        ctx.fillText("on, lvl 2", 50, 310)}
+        else if(ai1===3){ctx.fillStyle="#00FF00"
+        ctx.fillText("on, lvl 1", 50, 310)}
         else{ctx.fillStyle="#FF0000"
         ctx.fillText("off", 50, 310)}
 
@@ -209,7 +217,11 @@ function game_loop() {
         ctx.fillStyle="#aaaaaa"
         ctx.fillText("ai 2: ", 350, 300)
         if(ai2===1){ctx.fillStyle="#00FF00"
-        ctx.fillText("on", 350, 310)}
+        ctx.fillText("on, lvl 3", 350, 310)}
+        else if(ai2===2){ctx.fillStyle="#00FF00"
+        ctx.fillText("on, lvl 2", 350, 310)}
+        else if(ai2===3){ctx.fillStyle="#00FF00"
+        ctx.fillText("on, lvl 1", 350, 310)}
         else{ctx.fillStyle="#FF0000"
         ctx.fillText("off", 350, 310)}
 
@@ -262,14 +274,33 @@ function game_loop() {
         bx=bx+vx
         by=by+vy
 
-        if (ai2===1){
-            if(by>p2y){p2y=p2y+ph}
-            if(by<p2y){p2y=p2y-ph}
-        }
-        if(ai1===1){
-                if(by>p1y){p1y=p1y+ph}
-                if(by<p1y){p1y=p1y-ph}
+        if (ai2>=1){
+            if(by>p2y){
+                if(ai2===1){p2y=p2y+ph}
+                else if(ai2===2){p2y=p2y+ph/5}
+                else if(ai2===3){p2y=p2y+ph/10}
             }
+            if(by<p2y){
+                if(ai2===1){p2y=p2y-ph}
+                else if(ai2===2){p2y=p2y-ph/5}
+                else if(ai2===3){p2y=p2y-ph/10}
+
+            }
+        }
+        if (ai1>=1){
+            if(by>p1y){
+                if(ai1===1){p1y=p1y+ph}
+                else if(ai1===2){p1y=p1y+ph/5}
+                else if(ai1===3){p1y=p1y+ph/10}
+            }
+            if(by<p1y){
+                
+                if(ai1===1){p1y=p1y-ph}
+                else if(ai1===2){p1y=p1y-ph/5}
+                else if(ai1===3){p1y=p1y-ph/10}
+
+            }
+        }
         
 
 
@@ -288,11 +319,27 @@ function game_loop() {
             vx=vx*(-1)
             bx = p1x + pw;
 
-            if(vx<=0){
-                vx=vx-1
+            if(vy<=0){
+                if(p1y+(ph/2) < by+10){
+                    vy=-5-(by+10-p1y+(ph/2))/10
+
+                }
+                else if(p1y+(ph/2) > by+10){
+                    vy=5-(p1y+(ph/2)-by+10)/10
+
+                }
+                
+                
             }
             else{
-                vx=vx+1
+                if(p1y+(ph/2) < by+10){
+                    vy=5+(by+10-p1y+(ph/2))/10
+
+                }
+                else if(p1y+(ph/2) > by+10){
+                    vy=5+(p1y+(ph/2)-by+10)/10
+                }
+                
             }
         }
 
@@ -302,11 +349,27 @@ function game_loop() {
             bx = p2x - w;
             
 
-            if(vx<=0){
-                vx=vx-1
+            if(vy<=0){
+                if(p2y+(ph/2) < by+10){
+                    vy=-5-(by+10-p2y+(ph/2))/10
+
+                }
+                else if(p2y+(ph/2) > by+10){
+                    vy=-5-(p2y+(ph/2)-by+10)/10
+
+
+                }
+                
+                
             }
             else{
-                vx=vx+1
+                if(p2y+(ph/2) < by+10){
+                    vy=5+(by+10-p2y+(ph/2))/10
+                }
+                else if(p2y+(ph/2) > by+10){
+                    vy=5+(p2y+(ph/2)-by+10)/10
+                }
+                
             }
         }
 
