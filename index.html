@@ -97,15 +97,11 @@ function handleInput(e) {
                 else if(ai1===3){ai1=0}
                 else{ai1=1}
             }
-            else{
-                if(p1y <=400-ph*2){
-                    p1y=p1y+ph
-                }
-            }
-        } else {
-            if(p1y >= 0+ph){
-                p1y=p1y-ph
-            }
+            
+        } 
+        
+        if(menu===0) {
+            p1c = canvasY
         }
     }
     // Right half - controls Player 2
@@ -117,16 +113,11 @@ function handleInput(e) {
                 else if(ai2===3){ai2=0}
                 else{ai2=1}
             }
-            else{
-                if(p2y <=400-ph*2){
-                    p2y=p2y+ph
-                }
-            }
-        } else {
-            if(p2y >= 0+ph){
-                p2y=p2y-ph
-            }
+        } 
+        if(menu===0) {
+            p2c = canvasY
         }
+        
     }
 }
 
@@ -136,10 +127,16 @@ canvas.addEventListener("mousedown", handleInput);
 /* ============================================================
    GAME STATE
    ============================================================ */
+
+let p1c = 999;
+let p2c = 999;
+
 let bx = 200
 let by = 200
-let vx = 5
+let vx = 5  //velocity x
 let vy = 5
+let avx=0  //added velocity x
+let avy=0  //added velocity y
 
 let score1=0
 let score2=0
@@ -155,6 +152,10 @@ let p2y=0
 
 let ai2=0
 let ai1=0
+
+let p1d = 2;
+let p2d = 2;
+let bd = 1;
 
 let x=0 // temporary buffer 
 
@@ -228,26 +229,71 @@ function game_loop() {
     }
     if(menu===0){
         
+        if (p1c !== 999){
+            if (p1y < p1c-30){
+                p1y=p1y+w
+                p1d = 3
+            }
+            else if (p1y > p1c+30){
+                p1y=p1y-w
+                p1d = 1
+            }
+            else{
+                p1d = 2
+            }
+        }
+
+        if (p2c !== 999){
+            if (p2y < p2c-30){
+                p2y=p2y+w
+                p2d = 3
+            }
+            else if (p2y > p2c+30){
+                p2y=p2y-w
+                p2d = 1
+            }
+            else{
+                p2d = 2
+            }
+        }
+
+
         /* ===== UPDATE ===== */
         if (keys["w"]){
             if(p1y >=0){
                 p1y=p1y-h
             }
+            p1d=3;
+            p1c=999;
         }
-        if (keys["s"]){
+        else if (keys["s"]){
             if(p1y <=400-ph){
                 p1y=p1y+h
             }
+            p1d=1;
+            p1c=999;
         }
+        else{
+            p1d=2;
+        }
+
+
         if (keys["ArrowUp"]){
             if(p2y >=0){
                 p2y=p2y-h
             }
+            p2d=3;
+            p2c=999;
         }
-        if (keys["ArrowDown"]){
+        else if (keys["ArrowDown"]){
             if(p2y <=400-ph){
                 p2y=p2y+h
             }
+            p2d=1;
+            p2c=999;
+        }
+        else{
+            p2d=2;
         }
 
         /* ===== RENDER ===== */
@@ -271,10 +317,24 @@ function game_loop() {
         }
         x=0
         // Your original bouncing logic
-        bx=bx+vx
-        by=by+vy
+        if (vx>0){
+            bx=bx+vx
+        }
+        else{
+            bx=bx+vx+(avx*-1)
+        }
+        
+        if (vy>0){
+            by=by+vy+avy
+        }
+        else{
+            by=by+vy+(avy*-1)
+        }
+
+
 
         if (ai2>=1){
+            p2c=999
             if(by>p2y){
                 if(ai2===1){p2y=p2y+ph}
                 else if(ai2===2){p2y=p2y+ph/5}
@@ -288,6 +348,7 @@ function game_loop() {
             }
         }
         if (ai1>=1){
+            p1c=999
             if(by>p1y){
                 if(ai1===1){p1y=p1y+ph}
                 else if(ai1===2){p1y=p1y+ph/5}
@@ -310,9 +371,19 @@ function game_loop() {
         if((bx <= 0)){
             by=200;bx=200;vx=5;vy=5; score2=score2+1;
         }
-        if((by+20 >= 400) || (by <= 0)){
+
+
+        if((by <= 0)){
             vy=vy*(-1)
             by=by+vy
+
+            bd = 3
+        }
+        if((by+20 >= 400)){
+            vy=vy*(-1)
+            by=by+vy
+
+            bd = 1
         }
 
         if((bx <= p1x + pw)&& (by <= p1y + ph) && (by + h >= p1y)){
@@ -341,6 +412,19 @@ function game_loop() {
                 }
                 
             }
+
+
+            if (p1d == bd){
+                if (avy==-40){
+                    avy=0
+                }
+                avy=avy + 2
+            }
+            
+            if ((p1d==1 && bd ==3)||(p1d == 3 && bd ==1)){
+                ady=-40
+            }
+            
         }
 
 
@@ -370,6 +454,18 @@ function game_loop() {
                     vy=5+(p2y+(ph/2)-by+10)/10
                 }
                 
+            }
+
+
+            if (p2d == bd){
+                if (avy==-40){
+                    avy=0
+                }
+                avy=avy + 2
+            }
+            
+            if ((p2d==1 && bd ==3)||(p2d == 3 && bd ==1)){
+                ady=-40
             }
         }
 
