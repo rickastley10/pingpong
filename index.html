@@ -3,21 +3,27 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>pong</title>
+<title>minesweeper</title>
 <style>
     body {
-        margin: 0;
-        background: #111;
-        overflow: hidden;
-    }
+    margin: 0;
+    background: #111;
+    overflow: hidden;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 100vw;
+    height: 100vh;
+}
     canvas {
-        display: block;
-        margin: auto;
-        background: black;
-        touch-action: none;
-        width: 100vw;
-        height: 100vh;
-    }
+    background: black;
+    touch-action: none;
+
+    width: min(100vw, 100vh);
+    height: min(100vw, 100vh);
+}
 </style>
 </head>
 <body>
@@ -30,8 +36,8 @@
    ============================================================ */
 const WINDOW_WIDTH = 400;
 const WINDOW_HEIGHT = 400;
-const w = 20;
-const h = 20;
+const w = 40;
+const h = 40;
 
 /* ============================================================
    GLOBALS
@@ -82,43 +88,43 @@ function handleInput(e) {
     const scaleY = WINDOW_HEIGHT / rect.height;
     const canvasX = x * scaleX;
     const canvasY = y * scaleY;
+    if(175 < canvasX && canvasX < 225 && canvasY < 50){
+        if(pause===0){
+            pause=1
+        }
+        else{
+            pause=0
+        }
+    }
+    else if(canvasX < 200){
+        if(pause===0){
+            paddle1goto=canvasY
+        }
+        else if (pause===1){
+            if(player1AI===0){
+                player1AI=1
+            }
+            else{
+                player1AI=0
+            }
+        }
+        
+    }
+    else if(canvasX > 200){
+        if(pause===0){
+            paddle2goto=canvasY
+        }
+        else if (pause===1){
+            if(player2AI===0){
+                player2AI=1
+            }
+            else{
+                player2AI=0
+            }
+        }
+    }
     
-    if(canvasX > 150&& canvasX < 250 && canvasY < 100){
-        if(menu===0){menu=1}
-        else{menu=0}
-    }
 
-    // Left half - controls Player 1
-    if (canvasX < WINDOW_WIDTH / 2) {
-        if (canvasY > WINDOW_HEIGHT / 2) {
-           if(menu===1){
-                if(ai1===1){ai1=2}
-                else if(ai1===2){ai1=3}
-                else if(ai1===3){ai1=0}
-                else{ai1=1}
-            }
-            
-        } 
-        
-        if(menu===0) {
-            p1c = canvasY
-        }
-    }
-    // Right half - controls Player 2
-    else {
-        if (canvasY > WINDOW_HEIGHT / 2) {
-            if(menu===1){
-                if(ai2===1){ai2=2}
-                else if(ai2===2){ai2=3}
-                else if(ai2===3){ai2=0}
-                else{ai2=1}
-            }
-        } 
-        if(menu===0) {
-            p2c = canvasY
-        }
-        
-    }
 }
 
 canvas.addEventListener("touchstart", handleInput);
@@ -127,355 +133,267 @@ canvas.addEventListener("mousedown", handleInput);
 /* ============================================================
    GAME STATE
    ============================================================ */
+function reset(){
+    paddle1X=50
+    paddle1Y=200
+    paddle1Direction=0      // 1 - up, 2 - down, 0 - no movement
+    paddle1goto=999
 
-let p1c = 999;
-let p2c = 999;
 
-let bx = 200
-let by = 200
-let vx = 5  //velocity x
-let vy = 5
-let avx=0  //added velocity x
-let avy=0  //added velocity y
+    paddle2X=350
+    paddle2Y=200
+    paddle2Direction=0      // 1 - up, 2 - down, 0 - no movement
+    paddle2goto=999
 
-let score1=0
-let score2=0
 
-let pw=w/2
-let ph=w*4
+    ballX=180
+    ballY=200
+    ballVelocityX=5
+    ballVelocityY=5
+    ballDirection=2        // 1 - up, 2 - down, 0 - no movement
+}
 
-let p1x=40
-let p1y=0
 
-let p2x=360
-let p2y=0
+reset()
+player1Score = 0
+player2Score = 0
 
-let ai2=0
-let ai1=0
+player1AI = 0
+player2AI = 0
 
-let p1d = 2;
-let p2d = 2;
-let bd = 1;
-
-let x=0 // temporary buffer 
-
-let menu=1
-let clr=1
+pause = 0
 /* ============================================================
    MAIN LOOP
    ============================================================ */
 function game_loop() {
     if (!running) return;
-        
-        
+            if (keys[" "]){
+                if(pause===0){
+                    pause=1
+                }
+                else{
+                    pause=0
+                }
+            }
+            if (keys["p"]){
+                if(pause===0){
+                    pause=1
+                }
+                else{
+                    pause=0
+                }
+            }
+    if(pause===0){
+            
+            ctx.font = "15px Arial";
 
-    if (menu===1){
-        //clear screen
-        ctx.fillStyle="#000000"
-        ctx.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
-        if(menu===1){
-            ctx.fillStyle="#aa0000"
-            ctx.fillText("||", 200, 50)
-        }
-        if (keys["w"]){
-            menu=0
-        }
-        if (keys["s"]){
-            menu=0
-        }
-        if (keys["ArrowUp"]){
-            menu=0
-        }
-        if (keys["ArrowDown"]){
-            menu=0
-        }
+            //controls
 
-        clr=clr+1
-        if(clr> 0&& clr < 10){ctx.fillStyle="#aa0000"}
-        if(clr> 10&& clr < 20){ctx.fillStyle="#aaaa00"}
-        if(clr> 20&& clr < 30){ctx.fillStyle="#00aa00"}
-        if(clr> 30&& clr < 40){ctx.fillStyle="#00aaaa"}
-        if(clr> 50&& clr < 60){ctx.fillStyle="#0000aa"}
-        if(clr > 60){clr=0}
-        ctx.fillText("PONG!", 200, 200)
+            //keyboard
+            
 
 
 
-        // ai1
-        ctx.fillStyle="#aaaaaa"
-        ctx.fillText("ai 1: ", 50, 300)
-        if(ai1===1){ctx.fillStyle="#00FF00"
-        ctx.fillText("on, lvl 3", 50, 310)}
-        else if(ai1===2){ctx.fillStyle="#00FF00"
-        ctx.fillText("on, lvl 2", 50, 310)}
-        else if(ai1===3){ctx.fillStyle="#00FF00"
-        ctx.fillText("on, lvl 1", 50, 310)}
-        else{ctx.fillStyle="#FF0000"
-        ctx.fillText("off", 50, 310)}
+
+            if (keys["w"]){
+                if(paddle1Y>0){
+                    paddle1Y=paddle1Y-20
+                }
+                paddle1Direction = 1
+            }
+            else if (keys["s"]){
+                if(paddle1Y<350){
+                    paddle1Y=paddle1Y+20
+                }
+                paddle1Direction = 2
+            }
+            else{
+                paddle1Direction = 0
+            }
+
+            if (keys["ArrowUp"]){
+                if(paddle2Y>0){
+                    paddle2Y=paddle2Y-20
+                }
+                paddle2Direction = 1
+            }
+            else if (keys["ArrowDown"]){
+                if(paddle2Y<350){
+                    paddle2Y=paddle2Y+20
+                }
+                paddle2Direction = 2
+            }
+            else{
+                paddle2Direction = 0
+            }
+
+            //mouse / touch
+
+            //paddle 1
+            if(paddle1goto !== 999){
+            
+                if(paddle1goto > paddle1Y+30){
+                    paddle1Y += 20
+                    paddle1Direction=2
+                    if(paddle1Y > 350) paddle1Y = 350
+                }
+                else if(paddle1goto < paddle1Y +10){
+                    paddle1Y -= 20
+                    paddle1Direction=1
+                    if(paddle1Y < 0) paddle1Y = 0
+                }
+                else{
+                    paddle1goto = 999
+                    paddle1Direction=0
+                }
+            }
+
+            //paddle 2
+            if(paddle2goto !== 999){
+            
+                if(paddle2goto > paddle2Y+30){
+                    paddle2Y += 20
+                    paddle2Direction=2
+                    if(paddle2Y > 350) paddle2Y = 350
+                }
+                else if(paddle2goto < paddle2Y +10){
+                    paddle2Y -= 20
+                    paddle2Direction=1
+                    if(paddle2Y < 0) paddle2Y = 0
+                }
+                else{
+                    paddle2goto = 999
+                    paddle1Direction=0
+                }
+            }
+
+            if(player1AI === 1){
+                paddle1goto = ballY
+            }
+
+            if(player2AI === 1){
+                paddle2goto = ballY
+            }
+
+            //logic
+
+            //ball movement
+            ballX = ballX + ballVelocityX
+            ballY = ballY + ballVelocityY
+            
+            //wall bouncing logic
+            if(ballX>= 400){
+                player1Score += 1
+                reset()
+            }
+            if(ballX -20 <= 0){
+                player2Score += 1
+                reset()
+            }
+            if(ballY + 20 >= 400){
+                ballVelocityY = -ballVelocityY
+                ballDirection= 1
+            }
+            if(ballY <= 0){
+                ballVelocityY = -ballVelocityY
+                ballDirection= 2
+            }
+
+            //paddle collision
+            if(ballX <= paddle1X + 10 && ballY < paddle1Y+50 && ballY+20 > paddle1Y){
+                ballVelocityX = -ballVelocityX
+                
+                //ball acceleration
+                if(ballDirection === paddle1Direction){
+                    ballVelocityY = ballVelocityY * 1.25
+                }
+                else if((ballDirection === 1 && paddle1Direction === 2) || (ballDirection === 2 && paddle1Direction === 1)){
+                    ballVelocityY = ballVelocityY * 0.75
+                }
+
+            }
+
+            if(ballX + 20 >= paddle2X && ballY < paddle2Y+50 && ballY+20 > paddle2Y){
+                ballVelocityX = -ballVelocityX
+
+                //ball acceleration
+                if(ballDirection === paddle2Direction){
+                    ballVelocityY = ballVelocityY * 1.25
+                }
+                else if((ballDirection === 1 && paddle2Direction === 2) || (ballDirection === 2 && paddle2Direction === 1)){
+                    ballVelocityY = ballVelocityY * 0.75
+                }
+
+            }
 
 
-        // ai2
-        ctx.fillStyle="#aaaaaa"
-        ctx.fillText("ai 2: ", 350, 300)
-        if(ai2===1){ctx.fillStyle="#00FF00"
-        ctx.fillText("on, lvl 3", 350, 310)}
-        else if(ai2===2){ctx.fillStyle="#00FF00"
-        ctx.fillText("on, lvl 2", 350, 310)}
-        else if(ai2===3){ctx.fillStyle="#00FF00"
-        ctx.fillText("on, lvl 1", 350, 310)}
-        else{ctx.fillStyle="#FF0000"
-        ctx.fillText("off", 350, 310)}
+
+            /* ===== RENDER ===== */
+
 
     }
-    if(menu===0){
-        
-        if (p1c !== 999){
-            if (p1y < p1c-30){
-                p1y=p1y+w
-                p1d = 3
-            }
-            else if (p1y > p1c+30){
-                p1y=p1y-w
-                p1d = 1
-            }
-            else{
-                p1d = 2
-            }
-        }
-
-        if (p2c !== 999){
-            if (p2y < p2c-30){
-                p2y=p2y+w
-                p2d = 3
-            }
-            else if (p2y > p2c+30){
-                p2y=p2y-w
-                p2d = 1
-            }
-            else{
-                p2d = 2
-            }
-        }
-
-
-        /* ===== UPDATE ===== */
-        if (keys["w"]){
-            if(p1y >=0){
-                p1y=p1y-h
-            }
-            p1d=3;
-            p1c=999;
-        }
-        else if (keys["s"]){
-            if(p1y <=400-ph){
-                p1y=p1y+h
-            }
-            p1d=1;
-            p1c=999;
-        }
-        else{
-            p1d=2;
-        }
-
-
-        if (keys["ArrowUp"]){
-            if(p2y >=0){
-                p2y=p2y-h
-            }
-            p2d=3;
-            p2c=999;
-        }
-        else if (keys["ArrowDown"]){
-            if(p2y <=400-ph){
-                p2y=p2y+h
-            }
-            p2d=1;
-            p2c=999;
-        }
-        else{
-            p2d=2;
-        }
-
-        /* ===== RENDER ===== */
         //clear screen
         ctx.fillStyle="#000000"
         ctx.fillRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
 
+
+        //rendering
+
+        //paddle 1
+        ctx.fillStyle="#ff0000"
+        ctx.fillRect(paddle1X, paddle1Y, 10, 50)
+
+        //paddle 2
+        ctx.fillStyle="#0000ff"
+        ctx.fillRect(paddle2X, paddle2Y, 10, 50)
+
+        //ball
         ctx.fillStyle="#ffffff"
-        ctx.fillRect(bx, by, w, h)
+        ctx.fillRect(ballX, ballY, 20, 20)
 
+        //score
+        ctx.font = "30px Arial";
         ctx.fillStyle="#FF0000"
-        ctx.fillRect(p1x, p1y, pw, ph)
+        ctx.fillText(player1Score, 80, 100)
 
+        ctx.font = "30px Arial";
         ctx.fillStyle="#0000FF"
-        ctx.fillRect(p2x, p2y, pw, ph)
+        ctx.fillText(player2Score, 320, 100)
+
+
         
-        while(x<10){
-            ctx.fillStyle="#FFFFFF"
-            ctx.fillRect(200-2, x*40, 4, 30)
-            x=x+1
-        }
-        x=0
-        // Your original bouncing logic
-        if (vx>0){
-            bx=bx+vx
-        }
-        else{
-            bx=bx+vx+(avx*-1)
-        }
         
-        if (vy>0){
-            by=by+vy+avy
-        }
-        else{
-            by=by+vy+(avy*-1)
-        }
-
-
-
-        if (ai2>=1){
-            p2c=999
-            if(by>p2y){
-                if(ai2===1){p2y=p2y+ph}
-                else if(ai2===2){p2y=p2y+ph/5}
-                else if(ai2===3){p2y=p2y+ph/10}
-            }
-            if(by<p2y){
-                if(ai2===1){p2y=p2y-ph}
-                else if(ai2===2){p2y=p2y-ph/5}
-                else if(ai2===3){p2y=p2y-ph/10}
-
-            }
-        }
-        if (ai1>=1){
-            p1c=999
-            if(by>p1y){
-                if(ai1===1){p1y=p1y+ph}
-                else if(ai1===2){p1y=p1y+ph/5}
-                else if(ai1===3){p1y=p1y+ph/10}
-            }
-            if(by<p1y){
-                
-                if(ai1===1){p1y=p1y-ph}
-                else if(ai1===2){p1y=p1y-ph/5}
-                else if(ai1===3){p1y=p1y-ph/10}
-
-            }
-        }
+        ctx.font = "30px Arial";
+        ctx.fillStyle="#999999"
+        ctx.fillText("||", 200, 50)
         
-
-
-        if((bx >= 400)){
-            by=200;bx=200;vx=5;vy=5; score1=score1+1;
-        }
-        if((bx <= 0)){
-            by=200;bx=200;vx=5;vy=5; score2=score2+1;
-        }
-
-
-        if((by <= 0)){
-            vy=vy*(-1)
-            by=by+vy
-
-            bd = 3
-        }
-        if((by+20 >= 400)){
-            vy=vy*(-1)
-            by=by+vy
-
-            bd = 1
-        }
-
-        if((bx <= p1x + pw)&& (by <= p1y + ph) && (by + h >= p1y)){
-            vx=vx*(-1)
-            bx = p1x + pw;
-
-            if(vy<=0){
-                if(p1y+(ph/2) < by+10){
-                    vy=-5-(by+10-p1y+(ph/2))/10
-
-                }
-                else if(p1y+(ph/2) > by+10){
-                    vy=5-(p1y+(ph/2)-by+10)/10
-
-                }
-                
-                
+        if (pause===1){
+            if(player1AI===1){
+                ctx.font = "30px Arial";
+                ctx.fillStyle="#999999"
+                ctx.fillText("AI: ON", 20, 200)
             }
-            else{
-                if(p1y+(ph/2) < by+10){
-                    vy=5+(by+10-p1y+(ph/2))/10
-
-                }
-                else if(p1y+(ph/2) > by+10){
-                    vy=5+(p1y+(ph/2)-by+10)/10
-                }
-                
+            else if(player1AI===0){
+                ctx.font = "30px Arial";
+                ctx.fillStyle="#999999"
+                ctx.fillText("AI: OFF", 20, 200)
             }
 
-
-            if (p1d == bd){
-                if (avy==-40){
-                    avy=0
-                }
-                avy=avy + 2
+            if(player2AI===1){
+                ctx.font = "30px Arial";
+                ctx.fillStyle="#999999"
+                ctx.fillText("AI: ON", 300, 200)
             }
-            
-            if ((p1d==1 && bd ==3)||(p1d == 3 && bd ==1)){
-                ady=-40
+            else if(player2AI===0){
+                ctx.font = "30px Arial";
+                ctx.fillStyle="#999999"
+                ctx.fillText("AI: OFF", 280, 200)
             }
             
         }
 
 
-        if((bx+w >= p2x) &&(by <= p2y + ph) && (by + h >= p2y)){
-            vx=vx*(-1)
-            bx = p2x - w;
-            
 
-            if(vy<=0){
-                if(p2y+(ph/2) < by+10){
-                    vy=-5-(by+10-p2y+(ph/2))/10
-
-                }
-                else if(p2y+(ph/2) > by+10){
-                    vy=-5-(p2y+(ph/2)-by+10)/10
-
-
-                }
-                
-                
-            }
-            else{
-                if(p2y+(ph/2) < by+10){
-                    vy=5+(by+10-p2y+(ph/2))/10
-                }
-                else if(p2y+(ph/2) > by+10){
-                    vy=5+(p2y+(ph/2)-by+10)/10
-                }
-                
-            }
-
-
-            if (p2d == bd){
-                if (avy==-40){
-                    avy=0
-                }
-                avy=avy + 2
-            }
-            
-            if ((p2d==1 && bd ==3)||(p2d == 3 && bd ==1)){
-                ady=-40
-            }
-        }
-
-        ctx.fillStyle="#FF0000"
-        ctx.fillText(score1, 150, 100)
-        ctx.fillStyle="#0000FF"
-        ctx.fillText(score2, 250, 100)
-
-        
-    }
     setTimeout(() => {
         requestAnimationFrame(game_loop);
     }, 50);
